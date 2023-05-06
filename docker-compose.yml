@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: chronotraxx_db
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: db_password
+    ports:
+      - "5434:5434"
+    command: -p 5434
+    volumes:
+      - "ktor-explore-data:/var/lib/postgresql/data"
+volumes:
+  ktor-explore-data:

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Registration</title>
+<!--    <script type="module" src="/scripts/live-reload.js"></script>-->
+</head>
+<body>
+<h1>Registration</h1>
+<p>Welcome to Social Mediocre!</p>
+<p>A world of awkward pain curated for your bleeding soul</p>
+<p>Register by choosing a username and a password:</p>
+<form action='/register' method='post'>
+    <div><label>Username<input type="text" name="username"></label></div>
+    <div><label>Password<input type="password" name="password"></label></div>
+    <div><label>Repeat password<input type="password" name="password_repeat"></label></div>
+    <button>Register</button>
+</form>
+<a href="/login">login</a>
+<a href="/hello">hello</a>
+</body>
+</html>

@@ -45,5 +45,6 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("ApplicationKt")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=true")
 }

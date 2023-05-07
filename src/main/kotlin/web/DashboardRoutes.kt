@@ -32,10 +32,14 @@ fun Application.dashboardRouting() {
 
                 println("Employee is authorized for dashboardId $id, responding with dashboard")
                 val html = Renderer.render(
-                    "src/main/resources/pages/profile/dashboard.jinja2",
+                    "src/main/resources/pages/dashboard.jinja2",
                     hashMapOf("name" to session.name)
                 )
                 call.respondText(html, ContentType.Text.Html)
+            }
+
+            post("/timeframes/create"){
+
             }
         }
     }

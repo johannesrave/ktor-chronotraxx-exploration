@@ -1,5 +1,6 @@
-package auth
+package web
 
+import auth.UserAccountRepository
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -12,41 +13,7 @@ import java.util.*
 
 data class UserSession(val id: UUID, val name: String) : Principal
 
-fun Application.setupAuthentication(accounts: UserAccountRepository) {
-    install(Sessions) {
-        cookie<UserSession>("user_session", SessionStorageMemory()) {
-            cookie.path = "/"
-            cookie.maxAgeInSeconds = 3600
-        }
-    }
-
-    install(Authentication) {
-        form("auth-form-login") {
-            userParamName = "username"
-            passwordParamName = "password"
-            validate { credentials ->
-                accounts.fetchByCredentials(credentials)?.let {account ->
-                    val session = UserSession(name = account.name, id = account.id)
-                    this.sessions.set(session)
-                    session
-                }
-            }
-            challenge {
-                call.respondRedirect("/login")
-            }
-        }
-
-        session<UserSession>("auth-session") {
-            validate { it }
-            challenge { call.respondRedirect("/login") }
-        }
-
-        session<UserSession>("auth-session-repel") {
-            validate { it }
-            challenge { call.respondRedirect("/") }
-        }
-    }
-
+fun Application.authenticationRouting(accounts: UserAccountRepository) {
     routing {
         route("/login") {
             get {
@@ -63,8 +30,6 @@ fun Application.setupAuthentication(accounts: UserAccountRepository) {
                 }
             }
         }
-    }
-    routing {
         route("/register") {
             get {
                 val userSession = call.sessions.get<UserSession>()

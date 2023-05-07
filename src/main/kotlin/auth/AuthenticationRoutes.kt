@@ -10,6 +10,8 @@ import io.ktor.server.sessions.*
 import java.io.File
 import java.util.*
 
+data class UserSession(val id: UUID, val name: String) : Principal
+
 fun Application.setupAuthentication(accounts: UserAccountRepository) {
     install(Sessions) {
         cookie<UserSession>("user_session", SessionStorageMemory()) {
@@ -98,6 +100,3 @@ fun Application.setupAuthentication(accounts: UserAccountRepository) {
         }
     }
 }
-
-
-data class UserSession(val id: UUID, val name: String) : Principal

@@ -5,13 +5,14 @@ import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.routing.*
-
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import persistence.DbSettings
 import persistence.PostgresUserAccountRepository
+import persistence.TimeFrames
 import persistence.Users
 import java.io.File
 
@@ -27,14 +28,20 @@ fun main() {
 
 fun Application.init() {
     this.install(CallLogging)
-    val db = Database.connect(
-        url = "jdbc:postgresql://localhost:5434/chronotraxx_db",
-        driver = "org.postgresql.Driver",
-        user = "db_user",
-        password = "db_password"
-    )
-    transaction(db) {
-//        addLogger(StdOutSqlLogger)
+//    val db = Database.connect(
+//        url = "jdbc:postgresql://localhost:5434/chronotraxx_db",
+//        driver = "org.postgresql.Driver",
+//        user = "db_user",
+//        password = "db_password"
+//    )
+    val db = DbSettings.database
+//    db.config
+    transaction {
+        SchemaUtils.createMissingTablesAndColumns(Users, TimeFrames)
+    }
+
+    transaction {
+        addLogger(StdOutSqlLogger)
         Users.selectAll()
     }
 

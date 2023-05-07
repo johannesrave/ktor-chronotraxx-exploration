@@ -10,10 +10,14 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-object TimeFrames : UUIDTable(), TimeFrameRepository<ResultRow> {
-    private val begin = datetime("begin").defaultExpression(CurrentDateTime)
-    private val end = datetime("end").nullable()
-    private val user = reference("user", Users)
+object TimeFrames : UUIDTable() {
+    val begin = datetime("begin").defaultExpression(CurrentDateTime)
+    val end = datetime("end").nullable()
+    val user = reference("user", Users)
+
+}
+
+object PostgresTimeFramesRepository : TimeFrameRepository<ResultRow> {
 
     override fun create(timeFrame: TimeFrame): UUID = transaction {
         TimeFrames.insertAndGetId {
@@ -52,5 +56,5 @@ object TimeFrames : UUIDTable(), TimeFrameRepository<ResultRow> {
     }
 
     override fun mapToTimeFrame(raw: ResultRow): TimeFrame =
-        TimeFrame(raw[id].value, raw[begin], raw[end], raw[user].value)
+        TimeFrame(raw[TimeFrames.id].value, raw[TimeFrames.begin], raw[TimeFrames.end], raw[TimeFrames.user].value)
 }

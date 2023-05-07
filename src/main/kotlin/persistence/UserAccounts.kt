@@ -10,7 +10,6 @@ import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import persistence.Users.email
-import persistence.Users.id
 import persistence.Users.password
 import persistence.Users.username
 import java.util.*
@@ -36,8 +35,9 @@ object PostgresUserAccountRepository : UserAccountRepository {
         rowsToDelete == rowsDeleted
     }
 
-    override fun fetchByCredentials(credentials: UserPasswordCredential): UserAccount? =
+    override fun fetchByCredentials(credentials: UserPasswordCredential): UserAccount? = transaction {
         Users.select { (username eq credentials.name) and (password eq credentials.password) }
-            .map { UserAccount(it[id].value, it[username], it[password], it[email]) }
+            .map { result -> UserAccount(result[Users.id].value, result[username], result[password], result[email]) }
             .singleOrNull()
+    }
 }

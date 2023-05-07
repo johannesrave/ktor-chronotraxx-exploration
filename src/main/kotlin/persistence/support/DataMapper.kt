@@ -1,4 +1,4 @@
-package persistence
+package persistence.support
 
 interface Mapper<I, O> {
     fun map(input: I): O

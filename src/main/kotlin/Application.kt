@@ -19,9 +19,6 @@ fun main() {
 }
 
 fun Application.init() {
-//    install(CallLogging)
-//    install(RefreshBrowserOnReload)
-
     setupAuthentication()
     profileRouting()
 

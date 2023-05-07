@@ -9,7 +9,7 @@ import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import persistence.Profiles
-import persistence.Users
+import persistence.UsersTable
 import java.util.*
 
 class AuthUserPostgresRepository {
@@ -37,7 +37,7 @@ class AuthUserPostgresRepository {
         fun fetchByCredentials(creds: UserPasswordCredential): AuthUser? {
             return transaction {
                 AuthUserEntity.find {
-                    (Users.username eq creds.name) and (Users.password eq creds.password)
+                    (UsersTable.username eq creds.name) and (UsersTable.password eq creds.password)
                 }.with(AuthUserEntity::profile)
                     .map {
                         it.mapToAuthUser(profileId = it.profile.id.value)
@@ -61,12 +61,12 @@ class AuthUserPostgresRepository {
     }
 
     class AuthUserEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
-        companion object : EntityClass<UUID, AuthUserEntity>(Users)
+        companion object : EntityClass<UUID, AuthUserEntity>(UsersTable)
 
-        var username by Users.username
-        var email by Users.email
-        var password by Users.password
-        var profile by ProfileEntity referencedOn Users.profile
+        var username by UsersTable.username
+        var email by UsersTable.email
+        var password by UsersTable.password
+        var profile by ProfileEntity referencedOn UsersTable.profile
 
         fun mapToAuthUser(profileId: UUID? = null): AuthUser {
             val _profileId = profileId ?: transaction { profile.id.value }

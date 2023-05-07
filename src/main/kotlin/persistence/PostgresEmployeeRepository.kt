@@ -2,19 +2,11 @@ package persistence
 
 import core.Employee
 import core.EmployeeRepository
-import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-
-object Users : UUIDTable() {
-    val username = varchar("username", 64).uniqueIndex()
-    val password = varchar("password", 64)
-    val email = varchar("email", 64).nullable()
-    val currentTimeFrame = reference("currentTimeFrame", TimeFrames).nullable()
-}
 
 object PostgresEmployeeRepository : EmployeeRepository {
     override fun fetchById(id: UUID): Employee = transaction {

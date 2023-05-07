@@ -2,22 +2,12 @@ package persistence
 
 import core.TimeFrame
 import core.TimeFrameRepository
-import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-object TimeFrames : UUIDTable() {
-    val begin = datetime("begin").defaultExpression(CurrentDateTime)
-    val end = datetime("end").nullable()
-    val user = reference("user", Users)
-
-}
-
-object PostgresTimeFramesRepository : TimeFrameRepository<ResultRow> {
+object PostgresTimeFrameRepository : TimeFrameRepository<ResultRow> {
 
     override fun create(timeFrame: TimeFrame): UUID = transaction {
         TimeFrames.insertAndGetId {

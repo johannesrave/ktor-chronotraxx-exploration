@@ -2,7 +2,7 @@ package persistence
 
 import org.jetbrains.exposed.sql.Database
 
-object DbSettings {
+object PostgresSettings {
     val database by lazy {
         Database.connect(
             url = "jdbc:postgresql://localhost:5434/chronotraxx_db",

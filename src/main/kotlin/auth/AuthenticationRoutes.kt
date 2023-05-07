@@ -10,9 +10,7 @@ import io.ktor.server.sessions.*
 import java.io.File
 import java.util.*
 
-val users = AuthUserPostgresRepository
-
-fun Application.setupAuthentication() {
+fun Application.setupAuthentication(accounts: UserAccountRepository) {
     install(Sessions) {
         cookie<UserSession>("user_session", SessionStorageMemory()) {
             cookie.path = "/"
@@ -25,13 +23,10 @@ fun Application.setupAuthentication() {
             userParamName = "username"
             passwordParamName = "password"
             validate { credentials ->
-                getSessionBy(credentials)
-                    ?.also {
-                        println("logged in via form as ${it.name}")
-                        this.sessions.set(it)
-                    } ?: run {
-                    println("couldn't log in as ${credentials.name} using password ${credentials.password}")
-                    null
+                accounts.fetchByCredentials(credentials)?.let {account ->
+                    val session = UserSession(name = account.name, id = account.id)
+                    this.sessions.set(session)
+                    session
                 }
             }
             challenge {
@@ -75,34 +70,28 @@ fun Application.setupAuthentication() {
                     call.respondRedirect("/")
                 else
                     call.respondFile(File("src/main/resources/html/register.html"))
-                println(call.response.status())
             }
 
             post {
                 val formParams = call.receiveParameters()
                 val userName = formParams["username"]
+                val userEmail = formParams["email"]
                 val userPassword = formParams["password"]
                 val userPasswordRepeat = formParams["password_repeat"]
 
                 when {
-                    userName.isNullOrBlank() ||
-                    userPassword.isNullOrBlank() ||
-                    userPasswordRepeat.isNullOrBlank() -> {
-                        call.respondRedirect("/register")
-                    }
+                    userName.isNullOrBlank() || userEmail.isNullOrBlank()
+                    -> call.respondRedirect("/register")
 
-                    userPasswordRepeat != userPassword -> {
-                        call.respondRedirect("/register")
-                    }
+                    userPasswordRepeat != userPassword || userPassword.isNullOrBlank() || userPasswordRepeat.isNullOrBlank()
+                    -> call.respondRedirect("/register")
 
-                    else -> {
-                        try {
-                            users.create(userName, userPassword)
-                            call.response.header(HttpHeaders.Location, "/login")
-                            call.response.status(HttpStatusCode.TemporaryRedirect)
-                        } catch (error: Error) {
-                            call.respondRedirect("/register")
-                        }
+                    else -> try {
+                        accounts.register(userName, userPassword, userEmail)
+                        call.response.header(HttpHeaders.Location, "/login")
+                        call.response.status(HttpStatusCode.TemporaryRedirect)
+                    } catch (error: Error) {
+                        call.respondRedirect("/register")
                     }
                 }
             }
@@ -110,9 +99,5 @@ fun Application.setupAuthentication() {
     }
 }
 
-private fun getSessionBy(credentials: UserPasswordCredential): UserSession? =
-    users.fetchByCredentials(credentials)?.let {
-        return UserSession(name = it.username, id = it.id, profileId = it.profileId)
-    }
 
-data class UserSession(val id: UUID, val name: String, val profileId: UUID) : Principal
+data class UserSession(val id: UUID, val name: String) : Principal

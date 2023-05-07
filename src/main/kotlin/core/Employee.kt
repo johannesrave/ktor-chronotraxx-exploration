@@ -3,12 +3,12 @@ package core
 import kotlinx.datetime.Instant
 import java.util.*
 
-data class User(
-    val id: UUID? = null,
+data class Employee(
+    val id: UUID,
     val username: String,
     val password: String,
     val email: String? = null,
-    val currentTimeFrame: UUID? = null,
+    val currentTimeFrameId: UUID? = null,
 ) {
     fun beginWorkingTimeFrame(instant: Instant) {
         throw NotImplementedError()
@@ -23,14 +23,13 @@ data class User(
     }
 }
 
-interface UserRepository {
-    fun create(user: User): UUID
+interface EmployeeRepository {
 
-    fun fetchById(id: UUID): User
+    fun fetchById(id: UUID): Employee
 
-    fun fetchAll(): Collection<User>
+    fun fetchAll(): Collection<Employee>
 
     fun deleteById(id: UUID): Boolean
 
-    fun update(user: User): Boolean
+    fun update(employee: Employee): Boolean
 }

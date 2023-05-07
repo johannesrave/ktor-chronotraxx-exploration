@@ -10,33 +10,33 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-object TimeFramesTable : UUIDTable(), TimeFrameRepository<ResultRow> {
+object TimeFrames : UUIDTable(), TimeFrameRepository<ResultRow> {
     private val begin = datetime("begin").defaultExpression(CurrentDateTime)
     private val end = datetime("end").nullable()
-    private val user = reference("user", UsersTable)
+    private val user = reference("user", Users)
 
     override fun create(timeFrame: TimeFrame): UUID = transaction {
-        TimeFramesTable.insertAndGetId {
+        TimeFrames.insertAndGetId {
             it[user] = timeFrame.userId
         }.value
     }
 
     override fun fetchById(id: UUID): TimeFrame = transaction {
-        TimeFramesTable
-            .select { TimeFramesTable.id eq id }
+        TimeFrames
+            .select { TimeFrames.id eq id }
             .map { row -> mapToTimeFrame(row) }
             .first()
     }
 
     override fun fetchAll(): Collection<TimeFrame> = transaction {
-        TimeFramesTable
+        TimeFrames
             .selectAll()
             .map { row -> mapToTimeFrame(row) }
     }
 
     override fun update(timeFrame: TimeFrame): Boolean = transaction {
         val rowsToUpdate = 1
-        val rowsUpdated = TimeFramesTable.update({ TimeFramesTable.id eq timeFrame.id }) {
+        val rowsUpdated = TimeFrames.update({ TimeFrames.id eq timeFrame.id }) {
             it[begin] = timeFrame.begin
             it[end] = timeFrame.end
             it[user] = timeFrame.userId
@@ -47,7 +47,7 @@ object TimeFramesTable : UUIDTable(), TimeFrameRepository<ResultRow> {
 
     override fun deleteById(id: UUID): Boolean = transaction {
         val rowsToDelete = 1
-        val rowsDeleted = TimeFramesTable.deleteWhere { TimeFramesTable.id eq id }
+        val rowsDeleted = TimeFrames.deleteWhere { TimeFrames.id eq id }
         rowsToDelete == rowsDeleted
     }
 

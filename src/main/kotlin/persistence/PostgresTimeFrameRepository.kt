@@ -11,7 +11,6 @@ import org.jetbrains.exposed.sql.update
 import java.util.*
 
 object PostgresTimeFrameRepository : TimeFrameRepository {
-
     override fun create(timeFrame: TimeFrame): UUID = transaction {
         TimeFrames.insertAndGetId {
             it[user] = timeFrame.userId
@@ -20,25 +19,12 @@ object PostgresTimeFrameRepository : TimeFrameRepository {
         }.value
     }
 
-//    override fun fetchById(id: UUID): TimeFrame = transaction {
-//        TimeFrames
-//            .select { TimeFrames.id eq id }
-//            .map { row -> mapToTimeFrame(row) }
-//            .first()
-//    }
-//
-//    override fun fetchAll(): Collection<TimeFrame> = transaction {
-//        TimeFrames
-//            .selectAll()
-//            .map { row -> mapToTimeFrame(row) }
-//    }
-
     override fun update(timeFrame: TimeFrame): Boolean = transaction {
         val rowsToUpdate = 1
         val rowsUpdated = TimeFrames.update({ TimeFrames.id eq timeFrame.id }) {
+            it[user] = timeFrame.userId
             it[begin] = timeFrame.begin
             it[end] = timeFrame.end
-            it[user] = timeFrame.userId
         }
         rowsUpdated == rowsToUpdate
     }
@@ -54,13 +40,9 @@ object PostgresTimeFrameRepository : TimeFrameRepository {
         }
     }
 
-
     override fun deleteById(id: UUID): Boolean = transaction {
         val rowsToDelete = 1
         val rowsDeleted = TimeFrames.deleteWhere { TimeFrames.id eq id }
         rowsToDelete == rowsDeleted
     }
-
-//    override fun <ResultRow> mapToTimeFrame(raw: ResultRow): TimeFrame =
-//        TimeFrame(raw[TimeFrames.id].value, raw[TimeFrames.begin], raw[TimeFrames.end], raw[TimeFrames.user].value)
 }

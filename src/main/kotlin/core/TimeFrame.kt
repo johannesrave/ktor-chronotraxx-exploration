@@ -14,14 +14,8 @@ data class TimeFrame(
 interface TimeFrameRepository {
     fun create(timeFrame: TimeFrame): UUID
 
-//    fun fetchById(id: UUID): TimeFrame
-
-//    fun fetchAll(): Collection<TimeFrame>
-
     fun deleteById(id: UUID): Boolean
 
     fun update(timeFrame: TimeFrame): Boolean
     fun findAllByEmployee(id: UUID): Collection<TimeFrame>
-
-//    fun <T> mapToTimeFrame(raw: T): TimeFrame
 }

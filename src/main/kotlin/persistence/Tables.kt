@@ -15,6 +15,5 @@ object Users : UUIDTable() {
     val username = varchar("username", 64).uniqueIndex()
     val password = varchar("password", 64)
     val email = varchar("email", 64).nullable()
-//    val currentTimeFrame = reference("currentTimeFrame", TimeFrames).nullable()
     val isCurrentlyWorkingSince = datetime("isCurrentlyWorkingSince").nullable()
 }

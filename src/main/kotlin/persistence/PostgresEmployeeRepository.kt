@@ -2,8 +2,6 @@ package persistence
 
 import core.Employee
 import core.EmployeeRepository
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -29,11 +27,5 @@ object PostgresEmployeeRepository : EmployeeRepository {
             it[isCurrentlyWorkingSince] = employee.isCurrentlyWorkingSince
         }
         rowsUpdated == rowsToUpdate
-    }
-
-    override fun deleteById(id: UUID): Boolean = transaction {
-        val rowsToDelete = 1
-        val rowsDeleted = Users.deleteWhere { Users.id eq id }
-        rowsToDelete == rowsDeleted
     }
 }

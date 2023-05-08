@@ -1,4 +1,5 @@
 import auth.setupAuthentication
+import core.TimeTrackingService
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -30,11 +31,11 @@ fun Application.init() {
     val accounts = PostgresUserAccountRepository
     val employees = PostgresEmployeeRepository
     val timeframes = PostgresTimeFrameRepository
+    val timeTrackingService = TimeTrackingService(employees, timeframes)
 
     setupAuthentication(accounts)
     authenticationRouting(accounts)
-    dashboardRouting(employees, timeframes)
-    dashboardRouting(employees, timeframes)
+    dashboardRouting(timeframes, timeTrackingService)
 
     println("*** BOOTED UP ***")
 }

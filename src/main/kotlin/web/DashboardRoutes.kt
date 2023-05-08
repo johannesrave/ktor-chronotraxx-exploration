@@ -1,10 +1,7 @@
 package web
 
 import auth.UserSession
-import core.Employee
-import core.EmployeeRepository
-import core.TimeFrame
-import core.TimeFrameRepository
+import core.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -12,14 +9,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import view.Renderer
-import java.time.LocalDateTime
 
-fun Application.dashboardRouting(employees: EmployeeRepository, timeFrames: TimeFrameRepository) {
+fun Application.dashboardRouting(
+    timeFrames: TimeFrameRepository, timeTrackingService: TimeTrackingService
+) {
     routing {
         authenticate("auth-session") {
             get("/") {
-                call.principal<UserSession>()
-                    ?.let { (id, name) ->
+                call.principal<UserSession>()?.let { (id, name) ->
                         println("UserSession found with UUID $id, redirecting to dashboard")
                         call.respondRedirect("/dashboard/$id")
                     } ?: run {
@@ -28,49 +25,43 @@ fun Application.dashboardRouting(employees: EmployeeRepository, timeFrames: Time
                 }
             }
 
-            get("/dashboard/{dashboardId}") {
-                val session = call.principal<UserSession>()!!
-                val id = call.parameters["dashboardId"]
-                if (session.id.toString() != id) {
-                    call.respond(HttpStatusCode.Unauthorized)
-                    return@get
+            route("/dashboard/{dashboardId}"){
+                get {
+                    val session = call.principal<UserSession>()!!
+                    val employeeId = call.parameters["dashboardId"]
+                    if (session.id.toString() != employeeId) {
+                        call.respond(HttpStatusCode.Unauthorized)
+                        return@get
+                    }
+
+                    val html = Renderer.render(
+                        "src/main/resources/pages/dashboard.jinja2",
+                        hashMapOf("name" to session.name, "timeframes" to timeTrackingService.fetchWorkingTimes(employeeId))
+                    )
+                    call.respondText(html, ContentType.Text.Html)
                 }
 
-                println("Employee is authorized for dashboardId $id, responding with dashboard")
-                val employeeTimeFrames = timeFrames.findAllByEmployee(session.id)
-                val html = Renderer.render(
-                    "src/main/resources/pages/dashboard.jinja2",
-                    hashMapOf("name" to session.name, "timeframes" to employeeTimeFrames)
-                )
-                call.respondText(html, ContentType.Text.Html)
-            }
+                post {
+                    val session = call.principal<UserSession>()!!
+                    val employeeId = call.parameters["dashboardId"]!!
+                    if (session.id.toString() != employeeId) {
+                        call.respond(HttpStatusCode.Unauthorized)
+                        return@post
+                    }
 
-            post("/dashboard/{dashboardId}") {
-                val session = call.principal<UserSession>()!!
-                val id = call.parameters["dashboardId"]
-                if (session.id.toString() != id) {
-                    call.respond(HttpStatusCode.Unauthorized)
-                    return@post
+                    val formParameters = call.receiveParameters()
+                    val working = formParameters["working"].toString()
+
+                    when (working) {
+                        "start" -> timeTrackingService.beginWorking(employeeId)
+                        "stop" -> timeTrackingService.stopWorking(employeeId)
+                        else -> throw IllegalStateException("Employee is working already or hasn't begun yet")
+                    }
+
+                    call.respondRedirect("/dashboard/${employeeId}")
                 }
-                println("Employee is authorized for dashboardId $id")
-                val employee = employees.findById(session.id)
-                val formParameters = call.receiveParameters()
-                val working = formParameters["working"].toString()
-                println(employee)
-                println(working)
-
-                if (working == "start" && employee.isCurrentlyWorkingSince == null) {
-                    println("Registering starting time")
-//                    employee.startWork(LocalDateTime.now())
-                    employees.update(Employee(employee.id, employee.username, LocalDateTime.now()))
-                } else if (working == "stop" && employee.isCurrentlyWorkingSince != null) {
-                    println("Creating and persisting timeframe for employee $id")
-                    timeFrames.create(TimeFrame(null, employee.isCurrentlyWorkingSince!!, LocalDateTime.now(), employee.id))
-                    employees.update(Employee(employee.id, employee.username, null))
-                }
-
-                call.respondRedirect("/dashboard/${employee.id}")
             }
         }
     }
 }
+

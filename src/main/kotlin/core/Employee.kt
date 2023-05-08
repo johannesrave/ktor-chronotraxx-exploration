@@ -1,33 +1,35 @@
 package core
 
-import kotlinx.datetime.Instant
+import java.time.LocalDateTime
 import java.util.*
 
 data class Employee(
     val id: UUID,
     val username: String,
-    val password: String,
-    val email: String? = null,
-    val currentTimeFrameId: UUID? = null,
+    var isCurrentlyWorkingSince: LocalDateTime? = null,
 ) {
-    fun beginWorkingTimeFrame(instant: Instant) {
-        throw NotImplementedError()
+//    val startOfCurrentTimeFrame: Query
+
+    fun startWork(moment: LocalDateTime) {
+        isCurrentlyWorkingSince = moment
     }
 
-    fun endWorkingTimeFrame(instant: Instant) {
-        throw NotImplementedError()
+    fun endWork() {
+        isCurrentlyWorkingSince = null
     }
 
     fun getWorkingTimeFramesForDay() {
         throw NotImplementedError()
     }
+
+    fun isCurrentlyWorking() = isCurrentlyWorkingSince == null
 }
 
 interface EmployeeRepository {
 
-    fun fetchById(id: UUID): Employee
+    fun findById(id: UUID): Employee
 
-    fun fetchAll(): Collection<Employee>
+    fun findAll(): Collection<Employee>
 
     fun deleteById(id: UUID): Boolean
 

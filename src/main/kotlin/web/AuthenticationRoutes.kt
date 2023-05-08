@@ -1,6 +1,7 @@
 package web
 
 import auth.UserAccountRepository
+import auth.UserSession
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -9,9 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import java.io.File
-import java.util.*
 
-data class UserSession(val id: UUID, val name: String) : Principal
 
 fun Application.authenticationRouting(accounts: UserAccountRepository) {
     routing {

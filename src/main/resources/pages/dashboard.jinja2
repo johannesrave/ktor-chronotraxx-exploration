@@ -7,9 +7,15 @@
 <body>
 <h1>Welcome to the dashboard of {{ name }}</h1>
 
-<form>
-<button formaction="/timeframes/create" formmethod="post">START TIMEFRAME</button>
+<form method="post">
+    <button name="working" value="start">START WORKING</button>
+    <button name="working" value="stop">STOP WORKING</button>
 </form>
 
+<ol>
+    {% for timeframe in timeframes %}
+        <li>{{ timeframe }}</li>
+    {% endfor %}
+</ol>
 </body>
 </html>

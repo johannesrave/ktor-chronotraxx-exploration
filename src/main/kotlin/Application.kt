@@ -5,10 +5,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.callloging.*
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import persistence.PostgresSettings
-import persistence.PostgresUserAccountRepository
-import persistence.TimeFrames
-import persistence.Users
+import persistence.*
 import web.authenticationRouting
 import web.dashboardRouting
 
@@ -24,17 +21,20 @@ fun main() {
 
 fun Application.init() {
     this.install(CallLogging)
-    val db = PostgresSettings.database
+    val db = PostgresConfig.database
 
     transaction {
         SchemaUtils.createMissingTablesAndColumns(Users, TimeFrames)
     }
 
     val accounts = PostgresUserAccountRepository
+    val employees = PostgresEmployeeRepository
+    val timeframes = PostgresTimeFrameRepository
 
     setupAuthentication(accounts)
     authenticationRouting(accounts)
-    dashboardRouting()
+    dashboardRouting(employees, timeframes)
+    dashboardRouting(employees, timeframes)
 
     println("*** BOOTED UP ***")
 }

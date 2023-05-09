@@ -17,5 +17,6 @@ interface TimeFrameRepository {
     fun deleteById(id: UUID): Boolean
 
     fun update(timeFrame: TimeFrame): Boolean
+
     fun findAllByEmployee(id: UUID): Collection<TimeFrame>
 }

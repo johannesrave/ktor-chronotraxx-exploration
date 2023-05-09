@@ -49,10 +49,9 @@ fun Application.dashboardRouting(
                         return@post
                     }
 
-                    val formParameters = call.receiveParameters()
-                    val working = formParameters["working"].toString()
+                    val workingAction = call.receiveParameters()["working"]
 
-                    when (working) {
+                    when (workingAction) {
                         "start" -> timeTrackingService.beginWorking(employeeId)
                         "stop" -> timeTrackingService.stopWorking(employeeId)
                         else -> throw IllegalStateException("Employee is working already or hasn't begun yet")

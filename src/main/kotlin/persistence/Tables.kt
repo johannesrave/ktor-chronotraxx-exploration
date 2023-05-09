@@ -8,7 +8,6 @@ object TimeFrames : UUIDTable() {
     val begin = datetime("begin").defaultExpression(CurrentDateTime)
     val end = datetime("end")
     val user = reference("user", Users)
-
 }
 
 object Users : UUIDTable() {

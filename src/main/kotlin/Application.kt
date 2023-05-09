@@ -22,11 +22,7 @@ fun main() {
 
 fun Application.init() {
     this.install(CallLogging)
-    val db = PostgresConfig.database
-
-    transaction {
-        SchemaUtils.createMissingTablesAndColumns(Users, TimeFrames)
-    }
+    PostgresConfig.connect()
 
     val accounts = PostgresUserAccountRepository
     val employees = PostgresEmployeeRepository
